@@ -2,20 +2,20 @@ substitutions:
   devicename: ulanzi
   friendly_name: LED Matrix
   board: esp32dev
-  # Pin definition from https://github.com/aptonline/PixelIt_Ulanzi 
-  battery_pin: GPIO34 
-  buzzer_pin: GPIO15 
-  ldr_pin: GPIO35 
-  matrix_pin: GPIO32 
-  left_button_pin: GPIO26 
-  mid_button_pin: GPIO27 
-  right_button_pin: GPIO14 
-  scl_pin: GPIO22 
-  sda_pin: GPIO21 
+  # Pin definition from https://github.com/aptonline/PixelIt_Ulanzi
+  battery_pin: GPIO34
+  buzzer_pin: GPIO15
+  ldr_pin: GPIO35
+  matrix_pin: GPIO32
+  left_button_pin: GPIO26
+  mid_button_pin: GPIO27
+  right_button_pin: GPIO14
+  scl_pin: GPIO22
+  sda_pin: GPIO21
 
 image:
-   - file: 1pixel.gif
-     id: breaking20237
+  - file: 1pixel.gif
+    id: breaking20237
 
 animation:
   - file: 1pixel.gif
@@ -48,25 +48,25 @@ globals:
     initial_value: "true"
   - id: aab_add
     type: int
-    initial_value: '10'
+    initial_value: "10"
   - id: aab_max
     type: int
-    initial_value: '220'
+    initial_value: "220"
   - id: aab_min
     type: int
-    initial_value: '20'
+    initial_value: "20"
 
 external_components:
   - source:
       type: git
       url: https://github.com/lubeda/EspHoMaTriXv2
       ref: main
-    refresh: 60s 
-    components: [ ehmtxv2 ]   
+    refresh: 60s
+    components: [ehmtxv2]
 
 esphome:
   comment: "EHMTXv2 from LuBeDa"
-  name: $devicename 
+  name: $devicename
   project:
     name: "Ulanzi.EHMTXv2"
     version: "2.0.0"
@@ -98,13 +98,13 @@ font:
   # Store in a "fonts" subfolder of your ESPHome config folder or change paths below
   - file: fonts/MatrixLight8.bdf
     id: default_font
-    glyphs:  |
+    glyphs: |
       ! "#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz°
   - file: fonts/MatrixChunky6.bdf
     id: special_font
-    glyphs:  |
+    glyphs: |
       ! "#$%&'()*+,-./0123456789:APMTapmt
-  
+
 binary_sensor:
   - platform: status
     name: "$devicename Status"
@@ -114,13 +114,13 @@ binary_sensor:
       inverted: true
     name: "Left button"
   - platform: gpio
-    pin: 
+    pin:
       inverted: true
       number: $mid_button_pin
       mode: INPUT_PULLUP
     name: "Middle button"
   - platform: gpio
-    pin: 
+    pin:
       number: $right_button_pin
       inverted: true
     name: "Right button"
@@ -135,7 +135,7 @@ api:
         tune: string
       then:
         - rtttl.play:
-            rtttl: !lambda 'return tune;'
+            rtttl: !lambda "return tune;"
 
 sensor:
   - platform: sht3xd
@@ -164,7 +164,7 @@ sensor:
           if (r > 0) return r;
           if (r <= 0) return 1;
           return 0;
-    unit_of_measurement: '%'
+    unit_of_measurement: "%"
   - platform: adc
     id: light_sensor
     name: "$devicename Illuminance"
@@ -185,11 +185,11 @@ sensor:
               if (n > id(aab_max)) n = id(aab_max);
               if (n < id(aab_min)) n = id(aab_min);
               int c = id(rgb8x32)->get_brightness(); // current value
-              c = c>0?c:1 ; 
+              c = c>0?c:1 ;
               int d = (n - c) * 100 / c; // diff in %
               if ( abs(d) > 2 ) id(rgb8x32)->set_brightness(n);
             }
-      
+
 ota:
   password: !secret ota_password
 
@@ -217,12 +217,13 @@ light:
     gamma_correct: 2.0
     name: "$devicename Light"
     restore_mode: ALWAYS_OFF
-    
+
 time:
   - platform: homeassistant
     on_time_sync:
       then:
         ds1307.write_time:
+    id: ha_time
   - platform: ds1307
     update_interval: never
     id: ehmtx_time
@@ -239,25 +240,26 @@ display:
         return (x * 8) + y;
       }
       return (x * 8) + (7 - y);
-#    pixel_mapper: |-
-#      if (y % 2 == 0) {
-#        return (y * 32) + x;
-#      }
-#      return (y * 32) + (31 - x);
+    #    pixel_mapper: |-
+    #      if (y % 2 == 0) {
+    #        return (y * 32) + x;
+    #      }
+    #      return (y * 32) + (31 - x);
     rotation: 0°
     update_interval: 16ms
     auto_clear_enabled: true
     lambda: |-
       id(rgb8x32)->tick();
       id(rgb8x32)->draw();
-      
+
 ehmtxv2:
   id: rgb8x32
   icons2html: true
   matrix_component: ehmtx_display
-  time_component: ehmtx_time
+  #time_component: ehmtx_time
+  time_component: ha_time
   time_format: "%H:%M"
-  date_format: "%d.%m."
+  date_format: "%d.%m.%y"
   show_seconds: false
   # Uncomment below if using the mateine font
   # default_font_id: default_font
@@ -269,7 +271,7 @@ ehmtxv2:
   special_font_yoffset: 6
   # until here
   boot_logo: "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,63519,63519,63519,63519,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,63519,0,0,0,0,2016,0,0,0,0,0,0,0,0,0,0,31,0,0,0,0,0,0,0,0,0,63488,0,63488,0,0,0,63519,0,0,0,0,2016,2016,0,0,0,65514,0,65514,0,0,0,31,0,0,0,64512,0,0,64512,0,63488,63488,0,63488,63488,0,0,63519,63519,63519,0,0,2016,0,2016,0,65514,0,65514,0,65514,0,31,31,31,0,0,0,64512,64512,0,0,63488,63488,63488,63488,63488,0,0,63519,0,0,0,0,2016,0,2016,0,65514,0,65514,0,65514,0,0,31,0,0,0,0,64512,64512,0,0,0,63488,63488,63488,0,0,0,63519,63519,63519,63519,0,2016,0,2016,0,65514,0,65514,0,65514,0,0,0,31,31,0,64512,0,0,64512,0,0,0,63488,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
-  icons: 
+  icons:
     - id: error
       lameid: 40530
     - id: home_assistant
@@ -285,7 +287,7 @@ ehmtxv2:
     - id: car
       lameid: 2819
     - id: sleep8x32
-      url: https://user-images.githubusercontent.com/16407309/224850723-634c9b2d-55d9-44f2-9f93-765c0485b090.gif 
+      url: https://user-images.githubusercontent.com/16407309/224850723-634c9b2d-55d9-44f2-9f93-765c0485b090.gif
   on_next_screen:
     - homeassistant.event:
         event: esphome.new_screen
